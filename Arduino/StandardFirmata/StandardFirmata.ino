@@ -49,6 +49,7 @@
 
 #define PIN 6
 int val = 0;
+bool flash = false;
 /*==============================================================================
  * GLOBAL VARIABLES
  *============================================================================*/
@@ -761,19 +762,34 @@ void systemResetCallback()
 
 void colorpulse(uint32_t c, uint8_t wait)
 {
-  for(uint16_t i=0; i<strip.numPixels(); i++) 
+  while(flash == true)
   {
-    strip.setPixelColor(i, c);
+    for(uint16_t i=0; i<strip.numPixels(); i++) 
+      {
+        strip.setPixelColor(i, c);
+      }
+      strip.show();
+      delay(wait);
+      for(uint16_t i=0; i<strip.numPixels(); i++) 
+      {
+        strip.setPixelColor(i, 0, 0, 0);
+      }
+      strip.show();
+      delay(wait);
+      val = digitalRead(5);
+      if(val == 1)
+      { 
+        flash = true;
+      }
+      else
+      {
+        flash = false;
+      }
+      while (Firmata.available())
+        Firmata.processInput();
   }
-  strip.show();
-  delay(wait);
-  for(uint16_t i=0; i<strip.numPixels(); i++) 
-  {
-    strip.setPixelColor(i, 0, 0, 0);
-  }
-  strip.show();
-  delay(wait);
 }
+
 
 void setup()
 {
@@ -825,20 +841,25 @@ void loop()
   val = digitalRead(5);
   if(val == 1)
   {
+    flash = true;
+    colorpulse(strip.Color(0, 0, 255), 50);
+    /*
     for(uint16_t i=0; i<strip.numPixels(); i++) 
     {
       strip.setPixelColor(i, 0, 0, 255);
     }
+    */
   }
+  /*
   else
   {
     for(uint16_t i=0; i<strip.numPixels(); i++) 
     {
-      strip.setPixelColor(i, 0, 255, 0);
+      strip.setPixelColor(i, 0, 0, 0);
     }
   }
   strip.show();
-
+  */
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available())
