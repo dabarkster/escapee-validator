@@ -96,7 +96,7 @@ void loop()
   }
 
   val = digitalRead(5);
-  if(val == 1)
+  if(digitalRead(5) == HIGH)
   {
     flash = true;
     colorpulse(strip.Color(0, 0, 255), 50);
