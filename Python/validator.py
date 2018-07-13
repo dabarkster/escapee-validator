@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-test
+
 import os
 import pyfirmata
 import pygame
@@ -36,6 +36,29 @@ text_area = pygame.Rect(0,0,800,400)
 textBox = screen.subsurface(text_area)
 textBox.fill(white)
 
+def startup():
+    #Phoebe - Initiating validator startup sequence...
+    pass
+
+def validating():
+    #Phoebe - Validating formula...
+    
+    #fail
+    #Phoebe - Insuffucuent quantity of antidote, please add 10mL more...
+    
+    #pass
+    #Phoese - Formula for antidote is valid!  Sending antidotef ormula to generator....
+    
+    #start_generator()
+    pass
+
+def start_generator():
+    #Phoebe - Sending formula to generator...
+    pass
+
+def generator():
+    #Phobe - Antidote is complete, extract antidote from generator...
+    pass
 
 def text_objects(text, font):
     textSurface = font.render(text, True, red)
