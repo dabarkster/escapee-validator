@@ -34,35 +34,12 @@ test_img = photo_path + "test.jpg"
 img = pygame.image.load(test_img)
 #screen = pygame.display.set_mode((0,0));
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 0)
-screen = pygame.display.set_mode((1024, 1280), pygame.NOFRAME)
+screen = pygame.display.set_mode((1024, 1200), pygame.NOFRAME)
 photo_area = pygame.Rect(0,0,400,400)
 text_area = pygame.Rect(0,0,800,400)
 textBox = screen.subsurface(text_area)
 textBox.fill(white)
 
-def startup():
-    #Phoebe - Initiating validator startup sequence...
-    pass
-
-def validating():
-    #Phoebe - Validating formula...
-    
-    #fail
-    #Phoebe - Insuffucuent quantity of antidote, please add 10mL more...
-    
-    #pass
-    #Phoese - Formula for antidote is valid!  Sending antidotef ormula to generator....
-    
-    #start_generator()
-    pass
-
-def start_generator():
-    #Phoebe - Sending formula to generator...
-    pass
-
-def generator():
-    #Phobe - Antidote is complete, extract antidote from generator...
-    pass
 
 
 VIDEO_PATH = Path("/home/pi/escapee-validator/Videos/dna.mp4")
@@ -75,10 +52,6 @@ def showvideo():
     player.quit()
     #Popen(['omxplayer',  '--win', '"0 0 960 540"', movie])
 
-
-showvideo()
-while True:
-    pass
 
 def text_objects(text, font):
     textSurface = font.render(text, True, red)
@@ -103,7 +76,8 @@ def play_music(music_file):
 
 def main():
 
-    #message_display("Place sample into validator...")
+    message_display("Powering on validator...")
+    showvideo()
     #time.sleep(1)
     #message_display("Press start button...")
     #time.sleep(1)
