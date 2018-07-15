@@ -7,6 +7,9 @@ import random
 import time
 import paho.mqtt.client as paho
 from subprocess import Popen
+from omxplayer.player import OMXPlayer
+from pathlib import Path
+from time import sleep
 
 board = pyfirmata.Arduino('/dev/ttyACM0')
 
@@ -17,6 +20,7 @@ photo_path = '/home/pi/Pictures/'
 music_path = "/home/pi/Music/"
 font_path  = "/home/pi/escapee-validator/Fonts/"
 sound_path = "/home/pi/escapee-validator/Sounds/"
+video_path = "/home/pi/escapee-validator/Videos/"
 
 display_width = 1024
 display_height = 1280
@@ -30,12 +34,28 @@ test_img = photo_path + "test.jpg"
 img = pygame.image.load(test_img)
 #screen = pygame.display.set_mode((0,0));
 os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (0, 0)
-screen = pygame.display.set_mode((1024, 1024), pygame.NOFRAME)
+screen = pygame.display.set_mode((1024, 1280), pygame.NOFRAME)
 photo_area = pygame.Rect(0,0,400,400)
 text_area = pygame.Rect(0,0,800,400)
 textBox = screen.subsurface(text_area)
 textBox.fill(white)
 
+
+
+VIDEO_PATH = Path("/home/pi/escapee-validator/Videos/dna.mp4")
+
+
+def showvideo():
+    movie = video_path + 'dna.mp4'
+    player = OMXPlayer(movie)
+    sleep(15)
+    player.quit()
+    #Popen(['omxplayer',  '--win', '"0 0 960 540"', movie])
+
+
+showvideo()
+while True:
+    pass
 
 def text_objects(text, font):
     textSurface = font.render(text, True, red)
