@@ -19,21 +19,21 @@ video_path = "/home/pi/escapee-validator/Videos/"
 
 ######################## PYFirmata Initialize ########################
 board          = pyfirmata.Arduino('/dev/ttyACM0')
-pin_keyswitch  = board.get_pin('d:x:i')
-pin_bigbutt    = board.get_pin('d:x:i')
-pin_plas1      = board.get_pin('d:x:o')
-pin_plas2      = board.get_pin('d:x:o')
-pin_analyzing  = board.get_pin('d:x:o')
-pin_latch      = board.get_pin('d:x:o')
-pin_latch_butt = board.get_pin('d:x:i')
-pin_lightning  = board.get_pin('d:x:o')
-pin_sending    = board.get_pin('d:x:o')
-pin_uv         = board.get_pin('d:x:o')
+#pin_keyswitch  = board.get_pin('d:1:i')
+pin_bigbutt    = board.get_pin('d:2:i')
+pin_plas1      = board.get_pin('d:3:o')
+pin_plas2      = board.get_pin('d:4:o')
+pin_analyzing  = board.get_pin('d:5:o')
+pin_latch      = board.get_pin('d:6:o')
+pin_latch_butt = board.get_pin('d:7:i')
+pin_lightning  = board.get_pin('d:8:o')
+pin_sending    = board.get_pin('d:9:o')
+pin_uv         = board.get_pin('d:10:o')
 #pin_fan always on
-pin_fog        = board.get_pin('d:x:o')
-pin_arm        = board.get_pin('d:x:o')
+pin_fog        = board.get_pin('d:11:o')
+pin_arm        = board.get_pin('d:12:o')
 
-pin = board.get_pin('d:5:o')
+pin = board.get_pin('d:13:o')
 
 ######################## PY Initialize ########################
 
