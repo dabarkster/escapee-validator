@@ -20,8 +20,8 @@ sound_path = "/home/pi/escapee-validator/Sounds/"
 video_path = "/home/pi/escapee-validator/Videos/"
 
 ######################## PYFirmata Initialize ########################
-board          = pyfirmata.Arduino('/dev/ttyACM0')
-#pin_keyswitch  = board.get_pin('d:14:i')
+board          = pyfirmata.ArduinoMega('/dev/ttyACM0')
+pin_keyswitch  = board.get_pin('d:14:i')
 pin_bigbutt    = board.get_pin('d:2:i')
 pin_plas1      = board.get_pin('d:3:o')
 pin_plas2      = board.get_pin('d:4:o')
@@ -37,41 +37,82 @@ pin_arm        = board.get_pin('d:12:o')
 
 pin = board.get_pin('d:13:o')
 
+
 ######################## PY Functions ########################
 
 def text_objects(text, font):
     textSurface = font.render(text, True, red)
     return textSurface, textSurface.get_rect()
 
-def message_display(text):
-    text1 = text[0]
-    text2 = text[1]
+def drawText(surface, text, color, rect, font, aa=False, bkg=None):
+    rect = pygame.Rect(rect)
+    y = rect.top
+    lineSpacing = -2
 
+    # get the height of the font
+    fontHeight = pygame.font.size("Tg")[1]
 
+    while text:
+        i = 1
+
+        # determine if the row of text will be outside our area
+        if y + fontHeight > rect.bottom:
+            break
+
+        # determine maximum width of line
+        while pygame.font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+
+        # if we've wrapped the text, then adjust the wrap to the last word      
+        if i < len(text): 
+            i = text.rfind(" ", 0, i) + 1
+
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+
+        surface.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+
+        # remove the text we just blitted
+        text = text[i:]
+
+    return text
+
+def message_display(text1, text2):
+    #text1 = text[0]
+    #text2 = text[1]
+
+    print(text1)
     #textBox.fill(black)
     #textBox.set_alpha(50)
     #pygame.display.update()
 
-    font = pygame.font.SysFont("Grobold", 100)
+    font = pygame.font.SysFont("Arial", 100)
     text_rect = (0,0)
 
     #pygame.display.flip()
-    #term = font_path + 'saucer.ttf'
+    term = font_path + 'ready.otf'
     #os.path.exists(term)
-    #largeText = pygame.font.Font(term, 115)
-    #TextSurf, TextRect = text_objects(text, largeText)
+    largeText = pygame.font.Font(term, 50)
+    TextSurf, TextRect = text_objects("Power up", largeText)
     #TextRect.center = ((area_text.width/2),(area_text.height/2))
-    font = pygame.font.SysFont("Grobold", 100)
-    text_surf = font.render(text1, True, (240,240,240))
-    textBox.blit(text_surf, text_rect)
+    textBox.blit(TextSurf, TextRect )
+    
+    #font = pygame.font.SysFont("Arial", 50)
+    #text_surf = font.render("Pwer", True, (10,240,10))
+    #textBox.blit(text_surf, text_rect)
 
-    font = pygame.font.SysFont("Grobold", 50)
+    font = pygame.font.SysFont("Arial", 50)
     text_rect = (0,75)
     text_surf = font.render(text2, True, (240,240,240))
     textBox.blit(text_surf, text_rect)
 
     textBox.set_alpha(50)
-    #pygame.display.update()
+    pygame.display.update()
 
 ######################## Other Functions ########################
 def play_music(music_file):
@@ -176,7 +217,7 @@ pygame.init()
 pygame.font.init()
 print("Validator!")
 
-screen_width = 1000
+screen_width = 1024
 screen_height = 1280
 photo_size = 400
 photo_ratio = 536/820
@@ -186,14 +227,52 @@ black = (0,0,0)
 white = (255,255,255)
 red = (255,0,0)
 
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.NOFRAME);
+
+
+screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN);
+
+#### Dash ####
+dash_bottom = pygame.image.load(photo_path + '/validator_dash_bottom.png').convert()
+dash_bottom = pygame.transform.scale(dash_bottom, (screen_width, int(screen_height/2)))
+dash_top = pygame.image.load(photo_path + '/validator_dash_top.png').convert_alpha()
+dash_top = pygame.transform.scale(dash_top, (screen_width, int(screen_height/2)))
+dash_top = pygame.transform.rotate(dash_top, 180) 
+background_image = pygame.image.load(photo_path + '/validator_back.jpg').convert()
+background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
+
 area_photo = pygame.Rect(200,200,600,811)
 photo_box = screen.subsurface(area_photo)
-area_text = pygame.Rect(50, 50, photo_x, photo_y)
+area_text = pygame.Rect(234, 758, 546, 288)
+mole_area = pygame.Rect(0,0,660,420)
+mole_box = screen.subsurface(mole_area)
+#mole_box.fill(white)
+mole = pygame.image.load(photo_path + 'citric_acid.jpg').convert()
+mole = pygame.transform.scale(mole, (660,420))
+screen.blit(mole,[180,34])
 #print(screen)
 #print(area_text)
+screen.blit(dash_top, [0, 0])
+screen.blit(dash_bottom, [0, int(screen_height/2)])
 textBox = screen.subsurface(area_text)
-textBox.fill(white)
+#textBox.fill(white)
+
+
+#drawText(textBox, "Chump", (0,0,250), area_text, "ready.otf", aa=False, bkg=None)
+pygame.display.flip()
+message_display("Power","Now")
+
+
+gameexit = False
+while not gameexit:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            gameexit = True
+        elif event.type == pygame.KEYDOWN:
+            if event.key == K_ESCAPE:
+                gameexit = True
+            
+pygame.quit()
+quit()
 
 ######################## MQTT Initialize ########################
 topic        = "escapee/validator"
