@@ -25,15 +25,18 @@ pin_keyswitch  = board.get_pin('d:14:i')
 pin_bigbutt    = board.get_pin('d:2:i')
 pin_plas1      = board.get_pin('d:3:o')
 pin_plas2      = board.get_pin('d:4:o')
-pin_analyzing  = board.get_pin('d:5:o')
+pin_latch_butt = board.get_pin('d:5:i')
 pin_latch      = board.get_pin('d:6:o')
-pin_latch_butt = board.get_pin('d:7:i')
-pin_lightning  = board.get_pin('d:8:o')
-pin_sending    = board.get_pin('d:9:o')
+pin_analyze    = board.get_pin('d:7:o')
+#pin 8 is used for analyze LEDs
+pin_lightning  = board.get_pin('d:9:o')
+#pin 10 is use for lightning
+pin_sending    = board.get_pin('d:11:o')
+#pin 12 is used for sending
 pin_uv         = board.get_pin('d:10:o')
 #pin_fan always on
-pin_fog        = board.get_pin('d:11:o')
-pin_arm        = board.get_pin('d:12:o')
+#pin_fog        = board.get_pin('d:12:o')
+pin_arm        = board.get_pin('d:15:o')
 
 pin = board.get_pin('d:13:o')
 
@@ -262,18 +265,6 @@ pygame.display.flip()
 message_display("Power","Now")
 
 
-gameexit = False
-while not gameexit:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameexit = True
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                gameexit = True
-            
-pygame.quit()
-quit()
-
 ######################## MQTT Initialize ########################
 topic        = "escapee/validator"
 topicAll     = topic + "/#"
@@ -302,6 +293,23 @@ def main():
     powered_off = True
     passed = False
     sample_failure = True
+
+     gameexit = False
+    while not gameexit:
+        #pin_sending.write(1)
+        pin_analyze.write(1)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameexit = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gameexit = True
+                
+    pygame.quit()
+    quit()
+
+    while True:
+        pass
 
     #wait until key switch is turned on
     while powered_off == True:

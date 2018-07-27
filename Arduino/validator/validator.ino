@@ -27,6 +27,12 @@
 #include <Wire.h>
 #include <Firmata.h>
 #include "Arduino.h"
+#include "FastLED.h"
+#define NUM_LEDS 60 
+CRGB leds[NUM_LEDS];
+CRGB anal[4];
+#define strip_sending 12
+#define strip_analyzing 8
 
 #define I2C_WRITE                   B00000000
 #define I2C_READ                    B00001000
@@ -53,8 +59,15 @@ SerialFirmata serialFeature;
 #endif
 
 /*lightning*/
-int ledPin = 8;
-int lightning_go = 9;
+int analying_go   = 7;
+int analyzing_pin = 8;
+
+int lightning_go  = 9;
+int lightning_pin = 10;
+
+int sending_go    = 11;
+int sending_pin   = 12;
+
 int val = LOW;
 
 /* analog inputs */
@@ -268,6 +281,10 @@ void checkDigitalInputs(void)
  */
 void setPinModeCallback(byte pin, int mode)
 {
+  if (IS_PIN_DIGITAL(pin)) {
+    pinMode(PIN_TO_DIGITAL(pin), mode);
+  }
+  
   if (Firmata.getPinMode(pin) == PIN_MODE_IGNORE)
     return;
 
@@ -758,6 +775,12 @@ void systemResetCallback()
   isResetting = false;
 }
 
+/* Escapee funtions
+ *  
+ */
+
+
+
 void lightning()
 {
   int flashCount = random (3, 15);        // Min. and max. number of flashes each loop
@@ -778,10 +801,10 @@ void lightning()
  
   for (int flash = 0 ; flash <= flashCount; flash += 1) { // Flashing LED strip in a loop, random count
  
-    analogWrite(ledPin, random (flashBrightnessMin, flashBrightnessMax)); // Turn LED strip on, random brightness
+    analogWrite(lightning_pin, random (flashBrightnessMin, flashBrightnessMax)); // Turn LED strip on, random brightness
     delay(random(flashDurationMin, flashDurationMax)); // Keep it tured on, random duration
  
-    analogWrite(ledPin, 0); // Turn the LED strip off
+    analogWrite(lightning_pin, 0); // Turn the LED strip off
     delay(random(nextFlashDelayMin, nextFlashDelayMax)); // Random delay before next flash
   }
  
@@ -791,10 +814,120 @@ void lightning()
   delay(loopDelay);
 }
 
+void showStrip() {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   strip.show();
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H
+   // FastLED
+   FastLED.show();
+ #endif
+}
+
+void setPixel(int Pixel, byte red, byte green, byte blue) {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H 
+   // FastLED
+   leds[Pixel].r = red;
+   leds[Pixel].g = green;
+   leds[Pixel].b = blue;
+ #endif
+}
+
+void setPixelAnal(int Pixel, byte red, byte green, byte blue) {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+   // NeoPixel
+   strip.setPixelColor(Pixel, strip.Color(red, green, blue));
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H 
+   // FastLED
+   anal[Pixel].r = red;
+   anal[Pixel].g = green;
+   anal[Pixel].b = blue;
+ #endif
+}
+
+void setAll(byte red, byte green, byte blue) {
+  for(int i = 0; i < NUM_LEDS; i++ ) {
+    setPixel(i, red, green, blue); 
+  }
+  showStrip();
+}
+
+void colorWipe(byte red, byte green, byte blue, int SpeedDelay) {
+  for(uint16_t i=0; i<NUM_LEDS; i++) {
+      setPixel(i, red, green, blue);
+      showStrip();
+      delay(SpeedDelay);
+  }
+}
+
+void meteorRain(byte red, byte green, byte blue, byte meteorSize, byte meteorTrailDecay, boolean meteorRandomDecay, int SpeedDelay) {  
+  setAll(0,0,0);
+  
+  for(int i = 0; i < NUM_LEDS+NUM_LEDS; i++) {
+    
+    
+    // fade brightness all LEDs one step
+    for(int j=0; j<NUM_LEDS; j++) {
+      if( (!meteorRandomDecay) || (random(10)>5) ) {
+        fadeToBlack(j, meteorTrailDecay );        
+      }
+    }
+    
+    // draw meteor
+    for(int j = 0; j < meteorSize; j++) {
+      if( ( i-j <NUM_LEDS) && (i-j>=0) ) {
+        setPixel(i-j, red, green, blue);
+      } 
+    }
+   
+    showStrip();
+    delay(SpeedDelay);
+  }
+}
+
+void fadeToBlack(int ledNo, byte fadeValue) {
+ #ifdef ADAFRUIT_NEOPIXEL_H 
+    // NeoPixel
+    uint32_t oldColor;
+    uint8_t r, g, b;
+    int value;
+    
+    oldColor = strip.getPixelColor(ledNo);
+    r = (oldColor & 0x00ff0000UL) >> 16;
+    g = (oldColor & 0x0000ff00UL) >> 8;
+    b = (oldColor & 0x000000ffUL);
+
+    r=(r<=10)? 0 : (int) r-(r*fadeValue/256);
+    g=(g<=10)? 0 : (int) g-(g*fadeValue/256);
+    b=(b<=10)? 0 : (int) b-(b*fadeValue/256);
+    
+    strip.setPixelColor(ledNo, r,g,b);
+ #endif
+ #ifndef ADAFRUIT_NEOPIXEL_H
+   // FastLED
+   leds[ledNo].fadeToBlackBy( fadeValue );
+ #endif  
+}
+
+
 void setup()
 {
-  pinMode(ledPin, OUTPUT);
+  FastLED.addLeds<WS2811, strip_analyzing, GRB>(anal, 4).setCorrection( TypicalLEDStrip );
+  FastLED.addLeds<WS2811, strip_sending, GRB>(leds, NUM_LEDS).setCorrection( TypicalLEDStrip );
+
+
+  pinMode(analying_go, INPUT);
+  pinMode(analyzing_pin, OUTPUT);
   pinMode(lightning_go, INPUT);
+  pinMode(lightning_pin, OUTPUT);
+  pinMode(sending_go, INPUT);
+  pinMode(sending_pin, OUTPUT);
   
   Serial.begin(115200);
   
@@ -839,6 +972,24 @@ void loop()
     lightning();
   }
 
+  
+  //val = digitalRead(sending_go);
+  //Serial.println(val);
+  
+  if (digitalRead(sending_go) == HIGH)
+  {
+    //colorWipe(0x00,0xff,0x00, 50);
+    //colorWipe(0x00,0x00,0x00, 50);
+    meteorRain(0x00,0xff,0x00,10, 64, true, 30);
+  }
+  setPixelAnal(0,0,0xff,0);
+  setPixelAnal(1,0,0xff,0);
+  setPixelAnal(2,0,0xff,0);
+  setPixelAnal(3,0,0xff,0);
+  showStrip();
+  
+  meteorRain(0x00,0xff,0x00,1, 64, true, 30);
+  
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available())
