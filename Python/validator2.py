@@ -21,7 +21,11 @@ video_path = "/home/pi/escapee-validator/Videos/"
 
 ######################## PYFirmata Initialize ########################
 board          = pyfirmata.ArduinoMega('/dev/ttyACM0')
-pin_keyswitch  = board.get_pin('d:14:i')
+it = pyfirmata.util.Iterator(board)
+it.start()
+time.sleep(0.01)
+
+pin_keyswitch  = board.get_pin('d:24:i')
 pin_bigbutt    = board.get_pin('d:2:i')
 pin_plas1      = board.get_pin('d:3:o')
 pin_plas2      = board.get_pin('d:4:o')
@@ -232,37 +236,37 @@ red = (255,0,0)
 
 
 
-screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN);
+#screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN);
 
 #### Dash ####
-dash_bottom = pygame.image.load(photo_path + '/validator_dash_bottom.png').convert()
-dash_bottom = pygame.transform.scale(dash_bottom, (screen_width, int(screen_height/2)))
-dash_top = pygame.image.load(photo_path + '/validator_dash_top.png').convert_alpha()
-dash_top = pygame.transform.scale(dash_top, (screen_width, int(screen_height/2)))
-dash_top = pygame.transform.rotate(dash_top, 180) 
-background_image = pygame.image.load(photo_path + '/validator_back.jpg').convert()
-background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
+#dash_bottom = pygame.image.load(photo_path + '/validator_dash_bottom.png').convert()
+#dash_bottom = pygame.transform.scale(dash_bottom, (screen_width, int(screen_height/2)))
+#dash_top = pygame.image.load(photo_path + '/validator_dash_top.png').convert_alpha()
+#dash_top = pygame.transform.scale(dash_top, (screen_width, int(screen_height/2)))
+#dash_top = pygame.transform.rotate(dash_top, 180) 
+#background_image = pygame.image.load(photo_path + '/validator_back.jpg').convert()
+#background_image = pygame.transform.scale(background_image, (screen_width, screen_height))
 
-area_photo = pygame.Rect(200,200,600,811)
-photo_box = screen.subsurface(area_photo)
-area_text = pygame.Rect(234, 758, 546, 288)
-mole_area = pygame.Rect(0,0,660,420)
-mole_box = screen.subsurface(mole_area)
+#area_photo = pygame.Rect(200,200,600,811)
+#photo_box = screen.subsurface(area_photo)
+#area_text = pygame.Rect(234, 758, 546, 288)
+#mole_area = pygame.Rect(0,0,660,420)
+#mole_box = screen.subsurface(mole_area)
 #mole_box.fill(white)
-mole = pygame.image.load(photo_path + 'citric_acid.jpg').convert()
-mole = pygame.transform.scale(mole, (660,420))
-screen.blit(mole,[180,34])
+#mole = pygame.image.load(photo_path + 'citric_acid.jpg').convert()
+#mole = pygame.transform.scale(mole, (660,420))
+#screen.blit(mole,[180,34])
 #print(screen)
 #print(area_text)
-screen.blit(dash_top, [0, 0])
-screen.blit(dash_bottom, [0, int(screen_height/2)])
-textBox = screen.subsurface(area_text)
+#screen.blit(dash_top, [0, 0])
+#screen.blit(dash_bottom, [0, int(screen_height/2)])
+#textBox = screen.subsurface(area_text)
 #textBox.fill(white)
 
 
-#drawText(textBox, "Chump", (0,0,250), area_text, "ready.otf", aa=False, bkg=None)
-pygame.display.flip()
-message_display("Power","Now")
+######drawText(textBox, "Chump", (0,0,250), area_text, "ready.otf", aa=False, bkg=None)
+#pygame.display.flip()
+#message_display("Power","Now")
 
 
 ######################## MQTT Initialize ########################
@@ -294,28 +298,20 @@ def main():
     passed = False
     sample_failure = True
 
-     gameexit = False
-    while not gameexit:
-        #pin_sending.write(1)
-        pin_analyze.write(1)
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                gameexit = True
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_ESCAPE:
-                    gameexit = True
-                
-    pygame.quit()
-    quit()
-
-    while True:
-        pass
+    keyon = pin_keyswitch.read()
+    while True: #not keyon:
+        keyon = pin_keyswitch.read()
+        print(keyon)
+ 
 
     #wait until key switch is turned on
     while powered_off == True:
         #while pin_keyswitch.read() == 0:
             powered_off = False
     
+    print("up")
+    quit()
+
     powerupanalyzer()
     disable_latch = False
     #open door
@@ -340,6 +336,19 @@ def main():
 
     quit()
 
+    gameexit = False
+    while not gameexit:
+        #pin_sending.write(1)
+        pin_analyze.write(1)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameexit = True
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    gameexit = True
+                
+    pygame.quit()
+    quit()
 
 if __name__ == "__main__":
     main()

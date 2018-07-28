@@ -68,6 +68,8 @@ int lightning_pin = 10;
 int sending_go    = 11;
 int sending_pin   = 12;
 
+int big_butt = 24;
+int buttonState = 0;
 int val = LOW;
 
 /* analog inputs */
@@ -928,8 +930,11 @@ void setup()
   pinMode(lightning_pin, OUTPUT);
   pinMode(sending_go, INPUT);
   pinMode(sending_pin, OUTPUT);
+
+  pinMode(24, INPUT);
+
   
-  Serial.begin(115200);
+  Serial.begin(9600);
   
   Firmata.setFirmwareVersion(FIRMATA_FIRMWARE_MAJOR_VERSION, FIRMATA_FIRMWARE_MINOR_VERSION);
 
@@ -971,8 +976,14 @@ void loop()
   {
     lightning();
   }
-
   
+  buttonState = digitalRead(24);
+  Serial.println(buttonState);
+  
+  if (digitalRead(24) == HIGH)
+  {
+    Serial.println("HIGH");
+  }
   //val = digitalRead(sending_go);
   //Serial.println(val);
   
@@ -982,14 +993,14 @@ void loop()
     //colorWipe(0x00,0x00,0x00, 50);
     meteorRain(0x00,0xff,0x00,10, 64, true, 30);
   }
-  setPixelAnal(0,0,0xff,0);
+  /*setPixelAnal(0,0,0xff,0);
   setPixelAnal(1,0,0xff,0);
   setPixelAnal(2,0,0xff,0);
   setPixelAnal(3,0,0xff,0);
   showStrip();
   
   meteorRain(0x00,0xff,0x00,1, 64, true, 30);
-  
+  */
   /* STREAMREAD - processing incoming messagse as soon as possible, while still
    * checking digital inputs.  */
   while (Firmata.available())
